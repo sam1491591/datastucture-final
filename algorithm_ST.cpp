@@ -28,6 +28,18 @@ using namespace std;
  * 4. The function that print out the current board statement
 *************************************************************************/
 
+class pairxy {
+public:
+    int x;
+    int y;
+    pairxy(int x=0, int y=0)
+    {
+        this->x = x;
+        this->y = y;
+    }
+    ~pairxy(){}
+};
+
 
 class Board2 {
 private:
@@ -41,6 +53,7 @@ private:
 
 public:
     Board2();
+    ~Board2(){}
 
     // The basic functions of the Board
     int get_orbs_num(int i, int j);
@@ -283,29 +296,16 @@ void Board2::set_cell_color(int i, int j,char color) {
     return cells[i][j].set_color(color);
 }
 
-int available[5][6] = { '0' };
+pairxy maximum(Board board, Player player);
+pairxy minimum(Board board, Player player);
+
+
 int lesscapacity[5][6] = { '0' };
 
 void algorithm_A(Board board, Player player, int index[]){
     
     //////your algorithm design///////////
     //cout << player.get_color() << endl;
-    for (int i = 0; i < 5; i++)
-    {
-        for (int j = 0; j < 6; j++)
-        {
-            //cout << board.get_cell_color(i, j);
-            if (board.get_cell_color(i, j) == player.get_color() || board.get_cell_color(i, j) == 'w')
-            {
-
-                available[i][j] = 1;
-            }
-            else
-                available[i][j] = 0;
-            //cout <<available[i][j]<<" "<< i << " " << j << endl;
-        }
-        //cout << endl;
-    }
     /*
     int near = 8;
 
@@ -328,7 +328,42 @@ void algorithm_A(Board board, Player player, int index[]){
         }
     }
     */
+    /*
+    int* tmp[6];
+    for (int i = 0; i < 6; i++)
+        tmp[i] = available[i];
+    */
+    pairxy position=maximum(board, player);
     
+    index[0] = position.x;
+    index[1] = position.y;
+    
+
+}
+
+pairxy maximum(Board board, Player player)
+{
+    pairxy pos;
+
+    int available[5][6] = { '0' };
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 6; j++)
+        {
+            //cout << board.get_cell_color(i, j);
+            if (board.get_cell_color(i, j) == player.get_color() || board.get_cell_color(i, j) == 'w')
+            {
+
+                available[i][j] = 1;
+            }
+            else
+                available[i][j] = 0;
+            //cout <<available[i][j]<<" "<< i << " " << j << endl;
+        }
+        //cout << endl;
+    }
+
+    int max = 0;
     for (int i = 0; i < 5; i++)
     {
         for (int j = 0; j < 6; j++)
@@ -349,7 +384,6 @@ void algorithm_A(Board board, Player player, int index[]){
                 board2.place_orb(i, j, &player);
                 //board2.print_current_board(i, j, 1);
                 int chessnum = 0;
-                int max = 0;
                 for (int x = 0; x < 5; x++)
                 {
                     for (int y = 0; y < 6; y++)
@@ -364,8 +398,13 @@ void algorithm_A(Board board, Player player, int index[]){
                 if (chessnum > max)
                 {
                     max = chessnum;
-                    index[0] = i;
-                    index[1] = j;
+                    if(pos.x==0&&pos.y==0)
+                        pos=pairxy(i, j);
+                    else
+                    {
+                        pos.x = i;
+                        pos.y = j;
+                    }
                 }
                         //cout << chessnum << endl;
                 /*
@@ -382,5 +421,71 @@ void algorithm_A(Board board, Player player, int index[]){
             //    cout << i << " " << j << endl;
         }
     }
-
+    return pos;
 }
+/*
+pairxy minimum(Board board, Player player)
+{
+    pairxy pos;
+
+    int min = 1000;
+    for (int i = 0; i < 5; i++)
+    {
+        for (int j = 0; j < 6; j++)
+        {
+            if (available[i][j] == 1)
+            {
+                Board2 board2;
+                for (int x = 0; x < 5; x++)
+                {
+                    for (int y = 0; y < 6; y++)
+                    {
+                        board2.set_cell_color(x, y, board.get_cell_color(x, y));
+                        board2.set_orbs_num(x, y, board.get_orbs_num(x, y));
+                        //cout << board2.get_cell_color(x,y);
+                    }
+                    //cout << endl;
+                }
+                board2.place_orb(i, j, &player);
+                //board2.print_current_board(i, j, 1);
+                int chessnum = 0;
+                for (int x = 0; x < 5; x++)
+                {
+                    for (int y = 0; y < 6; y++)
+                    {
+                        if (player.get_color() == board2.get_cell_color(x, y))
+                        {
+                            chessnum += board2.get_orbs_num(x, y);
+                        }
+                    }
+                    //cout << endl;
+                }
+                if (chessnum > max)
+                {
+                    max = chessnum;
+                    if (pos.x == 0 && pos.y == 0)
+                        pos = pairxy(i, j);
+                    else
+                    {
+                        pos.x = i;
+                        pos.y = j;
+                    }
+                }
+                //cout << chessnum << endl;
+        
+        //lesscapacity[i][j] = board2.get_capacity(i, j) - board2.get_orbs_num(i, j);
+        //if (lesscapacity[i][j] < near)
+        //{
+        //   near = lesscapacity[i][j];
+        //    index[0] = i;
+        //    index[1] = j;
+        //}
+        
+            }
+            //else
+            //    cout << i << " " << j << endl;
+        }
+    }
+    return pos;
+}
+*/
